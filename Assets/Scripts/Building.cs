@@ -17,10 +17,14 @@ public class Building : MonoBehaviour
 
     public BuildingEvents buildingEvnts;
 
-
+    private DeliveryOrderSystem orderSystem;
     void Start()
     {
         SetupBuiding();
+        orderSystem = FindFirstObjectByType<DeliveryOrderSystem>();
+        CreateNameTag();
+
+
     }
 
     void HandleDriverService(DeliveryDriver dirver)
@@ -28,18 +32,28 @@ public class Building : MonoBehaviour
         switch (BuildingType)
         {
             case BuildingType.Restaurant:
-                Debug.Log($"{buildingName}에서 음식을 픽업했습니다.");
+                if(orderSystem !=null)
+                {
+                    orderSystem.OnDriverEnteredRestaurant(this);
+                }
                 break;
             case BuildingType.Customer:
-                Debug.Log($"{buildingName} 배달 완료.");
-                dirver.CompleteDelivery();
+                if (orderSystem != null)
+                {
+                    orderSystem.OnDriverEnteredCustorm(this);
+                }
+                else
+                {
+                    dirver.CompleteDelivery();
+                }
                 break;
             case BuildingType.ChargingStation:
-                Debug.Log($"{buildingName}에서 배터리를 충전했습니다.");
                 dirver.ChargeBattery();
                 break;
 
         }
+        buildingEvnts.OnServiceUsed?.Invoke(BuildingType);
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -76,14 +90,32 @@ public class Building : MonoBehaviour
                     break;
                 case BuildingType.Customer:
                     mat.color = Color.green;
-                    buildingName = "고객 집";
                     break;
                 case BuildingType.ChargingStation:
                     mat.color = Color.yellow;
-                    buildingName = "충전소";
                     break;
             }
         }
+
+        Collider col = GetComponent<Collider>();
+        if(col != null){ col.isTrigger = true; }
            
+    }
+
+    void CreateNameTag()
+    {
+        //건물 위에 이름표 생성
+        GameObject nameTag = new GameObject("NameTag");
+        nameTag.transform.SetParent(transform);
+        nameTag.transform.localPosition = Vector3.up * 1.5f;
+
+        TextMesh textMesh = nameTag.AddComponent<TextMesh>();
+        textMesh.text = buildingName;
+        textMesh.characterSize = 0.2f;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.color = Color.white;
+        textMesh.fontSize = 20;
+
+        nameTag.AddComponent<Billboard>();
     }
 }
