@@ -1,16 +1,13 @@
+using System;
 using UnityEngine;
 
-public class DungeonModels : MonoBehaviour
+[Serializable]
+public class DungeonRunData
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public string id;
+    public string state;
+    public int currentRoomIndex;
+    public int runGold;
+    public DungeonRoomData currentRoom;
 }
+

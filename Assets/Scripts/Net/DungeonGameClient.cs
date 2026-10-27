@@ -28,10 +28,80 @@ public class DungeonGameClient : MonoBehaviour
         returnButton.onClick.AddListener(() => SendAction("RETURN"));
         StartCoroutine(GetState());
     }
+
+    private void SetActiveButtons(bool attack, bool chest, bool rest, bool next, bool returnToTown)
+    {
+        attackButton.interactable = attack;
+        chestButton.interactable = chest;
+        restButton.interactable = rest;
+        nextButton.interactable = next;
+        returnButton.interactable = returnToTown;
+    }
     private void SendAction(string action)
     {
         string json = JsonUtility.ToJson(new DungeonActionRequest { action = action });
         StartCoroutine(Post("/api/dungeon/action", json));
+    }
+
+    private void UpdateButtons(DungeonRoomData room, string runState)
+    {
+        bool playing = runState == "IN_PROGRES";
+        bool cleared = room.state == "CLEARED";
+
+        enterButton.interactable = !playing;
+        SetActiveButtons(
+            playing && room.type == "MONTER" && !cleared,
+            playing && room.type == "TERASURE" && !cleared,
+            playing && room.type == "HEAL" && !cleared,
+            playing && cleared,
+            playing && room.type == "EXIT"
+            );
+    }
+
+    private string GetRoomDescription(DungeonRoomData room)
+    {
+        switch (room.type)
+        {
+            case "MONSTER":
+                return $"{room.monsterName} 출현!\n" +
+                       $"몬스터 HP : {room.monsterHp}\n" +
+                       $" 몬스터 공격력 : {room.monsterAttack}\n" +
+                       $" 처치 보상 : {room.rewardGold} Gold";
+            case "TREASURE":
+                return $"보물 상자를 발견 했습니다. \n 보상 : {room.rewardGold} Gold";
+            case "HEAL":
+                return "회복의 샘을 발견했습니다. \n 휴식하면 HP를 30 회복합니다.";
+            case "EXIT":
+                return "던전 출구를 발견했습니다. \n 귀환하면 탐험 골드를 획득합니다.";
+
+            default:
+                return "알수없는 방입니다.";
+        }
+            
+    }
+
+    private void ReadResponse(UnityWebRequest request)
+    {
+        string Json = request.downloadHandler.text;
+
+        DungeonResponse response = JsonUtility.FromJson<DungeonResponse>(Json);
+
+        if(response == null)
+        {
+            messageText.text = "서버 응답을 읽을 수 없습니다.";
+            Debug.LogError(Json);
+            return;
+        }
+
+        messageText.text = response.message;
+
+        if(!response.success || response.data == null)
+        {
+            Debug.LogError($"{response.code} : {response.message}");
+            return;
+        }
+
+        Draw(response.data);
     }
 
     private IEnumerator GetState()

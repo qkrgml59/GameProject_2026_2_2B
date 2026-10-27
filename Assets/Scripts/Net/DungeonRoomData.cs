@@ -8,6 +8,7 @@ public class DungeonRoomData
     public string type;
     public string state;
     public string monsterName;
+    public int monsterHp;
     public int monsterAttack;
     public int rewardGold;
 }

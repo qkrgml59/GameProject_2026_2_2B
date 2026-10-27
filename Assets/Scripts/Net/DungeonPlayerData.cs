@@ -8,7 +8,7 @@ public class DungeonPlayerData
     public string name;
     public int level;
     public int hp;
-    public int maxhp;
+    public int maxHp;
     public int attack;
     public int gold;
 

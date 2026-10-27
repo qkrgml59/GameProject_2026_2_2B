@@ -5,11 +5,11 @@ using UnityEngine;
 public class DungeonStateData
 {
     public DungeonPlayerData player;
-    public DungeonRoomData room;
+    public DungeonRunData run;
 }
 
 [Serializable]
-public class DungonResponse
+public class DungeonResponse
 {
     public bool success;
     public string code;
