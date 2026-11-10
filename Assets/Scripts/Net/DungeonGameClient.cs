@@ -101,7 +101,7 @@ public class DungeonGameClient : MonoBehaviour
             return;
         }
 
-        Draw(response.data);
+        //Draw(response.data);
     }
 
     private IEnumerator GetState()
